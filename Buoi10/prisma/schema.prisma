@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/common/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Food {
+  food_id   Int        @id @default(autoincrement())
+  food_name String?    @db.VarChar(255)
+  image     String?    @db.VarChar(255)
+  price     Float?     @db.Float
+  desc      String?    @db.VarChar(255)
+  type_id   Int?
+  isDeleted Boolean    @default(false)
+  createdAt DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt DateTime   @default(now()) @db.Timestamp(0)
+  Food_type Food_type? @relation(fields: [type_id], references: [type_id], onDelete: NoAction, onUpdate: NoAction, map: "Food_ibfk_1")
+  Orders    Orders[]
+  Sub_food  Sub_food[]
+
+  @@index([type_id], map: "type_id")
+}
+
+model Food_type {
+  type_id   Int     @id @default(autoincrement())
+  type_name String? @db.VarChar(255)
+  Food      Food[]
+}
+
+model Like_res {
+  id         Int         @id @default(autoincrement())
+  user_id    Int?
+  res_id     Int?
+  date_like  DateTime?   @db.DateTime(0)
+  Restaurent Restaurent? @relation(fields: [res_id], references: [res_id], onDelete: NoAction, onUpdate: NoAction, map: "Like_res_ibfk_1")
+  Users      Users?      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Like_res_ibfk_2")
+
+  @@index([res_id], map: "res_id")
+  @@index([user_id], map: "user_id")
+}
+
+model Orders {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  foodId    Int?
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
+  Users     Users?   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Orders_ibfk_1")
+  Food      Food?    @relation(fields: [foodId], references: [food_id], onDelete: NoAction, onUpdate: NoAction, map: "Orders_ibfk_2")
+
+  @@index([foodId], map: "foodId")
+  @@index([userId], map: "userId")
+}
+
+model Rate_res {
+  id         Int         @id @default(autoincrement())
+  user_id    Int?
+  res_id     Int?
+  amount     Int?
+  date_rate  DateTime?   @db.DateTime(0)
+  Restaurent Restaurent? @relation(fields: [res_id], references: [res_id], onDelete: NoAction, onUpdate: NoAction, map: "Rate_res_ibfk_1")
+  Users      Users?      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Rate_res_ibfk_2")
+
+  @@index([res_id], map: "res_id")
+  @@index([user_id], map: "user_id")
+}
+
+model Restaurent {
+  res_id   Int        @id @default(autoincrement())
+  res_name String?    @db.VarChar(255)
+  image    String?    @db.VarChar(255)
+  desc     String?    @db.VarChar(255)
+  Like_res Like_res[]
+  Rate_res Rate_res[]
+}
+
+model Sub_food {
+  sub_id    Int     @id @default(autoincrement())
+  sub_name  String? @db.VarChar(255)
+  sub_price Float?  @db.Float
+  food_id   Int?
+  Food      Food?   @relation(fields: [food_id], references: [food_id], onDelete: NoAction, onUpdate: NoAction, map: "Sub_food_ibfk_1")
+
+  @@index([food_id], map: "food_id")
+}
+
+model Users {
+  id        Int        @id @default(autoincrement())
+  email     String     @unique(map: "email") @db.VarChar(255)
+  fullName  String?    @db.VarChar(255)
+  avatar    String?    @db.VarChar(255)
+  password  String?    @db.VarChar(255)
+  googleId  String?    @db.VarChar(255)
+  isDeleted Boolean    @default(false)
+  createdAt DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt DateTime   @default(now()) @db.Timestamp(0)
+  Like_res  Like_res[]
+  Orders    Orders[]
+  Rate_res  Rate_res[]
+}
